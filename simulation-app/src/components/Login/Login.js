@@ -13,7 +13,7 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
-import { Link, Switch, Route } from 'react-router-dom';
+import { Link, Switch, Route, Redirect } from 'react-router-dom';
 import Registration from '../Registration/Registration';
 import axios from 'axios';
 
@@ -57,7 +57,37 @@ const useStyles = makeStyles(theme => ({
 
 export default function SignIn() {
   const classes = useStyles();
+  var [email, setemail] = useState('');
+  var [pass, setpass] = useState('');
+  var [error, seterror] = useState(false);
+  var [success, setsuccess] = useState(false);
 
+  const loginthis = () =>{
+    axios
+    .post('http://localhost:3000/login', {
+      "email": email,
+      "password": pass
+    }).then((res,i)=>{
+      localStorage.setItem('token', res.data.accessToken)
+      setsuccess(true)
+    })
+    .catch(err => seterror(true))
+  }
+  if(success){
+    return(<Redirect to='/usermanagement'/>)
+  }
+  if(localStorage.getItem('token')){
+    return(<Redirect to='/usermanagement'/>)
+  }
+  // if(error === true){
+  //   return(
+  //     <React.Fragment>
+  //       {alert('Incorrect Password')}
+  //       {setemail('')}
+  //       {setpass('')}
+  //     </React.Fragment>
+  //   )
+  // }
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -69,34 +99,44 @@ export default function SignIn() {
           Sign in
         </Typography>
         <ValidatorForm 
-            className={classes.form}
+          className={classes.form}
+          onSubmit={loginthis}
+          onError={errors => console.log(errors)}
         >
           <TextValidator
             variant="outlined"
-            margin="normal"
-            required
             fullWidth
             id="email"
             label="Email Address"
             name="email"
             autoComplete="email"
+            validators={['required', 'isEmail']}
+            errorMessages={['This field is required', 'email is not valid']}
+            onChange={(e)=>{setemail(e.target.value)}}
+            value={email}
+            margin="normal"
             autoFocus
           />
           <TextValidator
             variant="outlined"
-            margin="normal"
-            required
             fullWidth
             name="password"
             label="Password"
             type="password"
             id="password"
             autoComplete="current-password"
+            validators={['required']}
+            errorMessages={['This field is required']}
+            onChange={(e)=>{setpass(e.target.value)}}
+            value={pass}
+            margin="normal"
+            autoComplete="current-password"
           />
-          <FormControlLabel
+          {(error)? <p className="error">Invalid Password!</p>:(null)}
+          {/* <FormControlLabel
             control={<Checkbox value="remember" color="primary" />}
             label="Remember me"
-          />
+          /> */}
           <Button
             type="submit"
             fullWidth

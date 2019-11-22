@@ -13,8 +13,8 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
-import Login from '../../App';
-import { Link, Switch, Route } from 'react-router-dom';
+// import Login from '../Login/Login';
+// import { Link, Switch, Route } from 'react-router-dom';
 import axios from 'axios';
 
 // function Copyright() {
@@ -194,12 +194,12 @@ export default function SignUp() {
                 value={cpass}
               />
             </Grid>
-            <Grid item xs={12}>
+            {/* <Grid item xs={12}>
               <FormControlLabel
                 control={<Checkbox value="allowExtraEmails" color="primary" />}
                 label="I want to receive inspiration, marketing promotions and updates via email."
               />
-            </Grid>
+            </Grid> */}
           </Grid>
           <Button
             type="submit"
@@ -211,7 +211,7 @@ export default function SignUp() {
             Sign Up
           </Button>
         </ValidatorForm>
-          <Grid container justify="flex-end">
+          {/* <Grid container justify="flex-end">
             <Grid item>
               <Link to="/login" variant="body2">
                 Already have an account? Sign in
@@ -220,7 +220,7 @@ export default function SignUp() {
                 <Route component={Login} path='/login'/>
               </Switch>
             </Grid>
-          </Grid>
+          </Grid> */}
       </div>
       {/* <Box mt={5}>
         <Copyright />
