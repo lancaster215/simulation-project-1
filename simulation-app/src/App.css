@@ -35,3 +35,22 @@
 .error{
   color: red;
 }
+.active{
+  height: 10px;
+  width: 10px;
+  background-color: chartreuse;
+  border-radius: 50%;
+}
+.inactive{
+  height: 10px;
+  width: 10px;
+  background-color: #ff6737;
+  border-radius: 50%;
+}
+.MuiButton-outlinedPrimary{
+  float: right;
+  margin: 20px;
+}
+#logout-btn{
+  float: right;
+}

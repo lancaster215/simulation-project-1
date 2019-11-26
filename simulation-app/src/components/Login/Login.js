@@ -2,12 +2,7 @@ import React, {useState} from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
-// import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-// import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
-// import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
@@ -16,19 +11,10 @@ import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import { Link, Switch, Route, Redirect } from 'react-router-dom';
 import Registration from '../Registration/Registration';
 import axios from 'axios';
-
-// function Copyright() {
-//   return (
-//     <Typography variant="body2" color="textSecondary" align="center">
-//       {'Copyright © '}
-//       <Link color="inherit" href="https://material-ui.com/">
-//         Your Website
-//       </Link>{' '}
-//       {new Date().getFullYear()}
-//       {'.'}
-//     </Typography>
-//   );
-// }
+import InputAdornment from '@material-ui/core/InputAdornment';
+import IconButton from '@material-ui/core/IconButton';
+import Visibility from '@material-ui/icons/Visibility';
+import VisibilityOff from '@material-ui/icons/VisibilityOff';
 
 const useStyles = makeStyles(theme => ({
   '@global': {
@@ -47,7 +33,7 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.secondary.main,
   },
   form: {
-    width: '100%', // Fix IE 11 issue.
+    width: '100%',
     marginTop: theme.spacing(1),
   },
   submit: {
@@ -57,37 +43,42 @@ const useStyles = makeStyles(theme => ({
 
 export default function SignIn() {
   const classes = useStyles();
-  var [email, setemail] = useState('');
-  var [pass, setpass] = useState('');
-  var [error, seterror] = useState(false);
-  var [success, setsuccess] = useState(false);
+  const [values, setValues] = useState({
+    email: '',
+    pass: '',
+    error: false,
+    success: false,
+  })
 
   const loginthis = () =>{
     axios
     .post('http://localhost:3000/login', {
-      "email": email,
-      "password": pass
+      "email": values.email,
+      "password": values.pass,
     }).then((res,i)=>{
       localStorage.setItem('token', res.data.accessToken)
-      setsuccess(true)
+      localStorage.setItem('useremail', values.email)
+      setValues({...values, success: true})
     })
-    .catch(err => seterror(true))
+    .catch(err => setValues({...values, error: true}))
   }
-  if(success){
+  if(values.success){
     return(<Redirect to='/usermanagement'/>)
   }
   if(localStorage.getItem('token')){
     return(<Redirect to='/usermanagement'/>)
   }
-  // if(error === true){
-  //   return(
-  //     <React.Fragment>
-  //       {alert('Incorrect Password')}
-  //       {setemail('')}
-  //       {setpass('')}
-  //     </React.Fragment>
-  //   )
-  // }
+  const eventhandler = (e) =>{
+    let prevdata = Object.assign({}, values);
+    prevdata[e.target.name] = e.target.value;
+    setValues(prevdata);
+  }
+  const handleClickShowPassword = () => {
+    setValues({ ...values, showPassword: !values.showPassword });
+  };
+  const handleMouseDownPassword = event => {
+    event.preventDefault();
+  };
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -112,31 +103,39 @@ export default function SignIn() {
             autoComplete="email"
             validators={['required', 'isEmail']}
             errorMessages={['This field is required', 'email is not valid']}
-            onChange={(e)=>{setemail(e.target.value)}}
-            value={email}
+            onChange={eventhandler}
+            value={values.email}
             margin="normal"
             autoFocus
           />
           <TextValidator
             variant="outlined"
             fullWidth
-            name="password"
+            name="pass"
             label="Password"
-            type="password"
+            type={values.showPassword ? 'text' : 'password'}
             id="password"
             autoComplete="current-password"
             validators={['required']}
             errorMessages={['This field is required']}
-            onChange={(e)=>{setpass(e.target.value)}}
-            value={pass}
+            onChange={eventhandler}
+            value={values.pass}
             margin="normal"
-            autoComplete="current-password"
+            InputProps={{
+              endAdornment:(
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    onMouseDown={handleMouseDownPassword}
+                  >
+                    {values.showPassword ? <Visibility /> : <VisibilityOff />}
+                  </IconButton>
+                </InputAdornment>
+              )
+            }}
           />
-          {(error)? <p className="error">Invalid Password!</p>:(null)}
-          {/* <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
-            label="Remember me"
-          /> */}
+          {(values.error)? <p className="error">Invalid Password or Username!</p>:(null)}
           <Button
             type="submit"
             fullWidth
@@ -147,11 +146,6 @@ export default function SignIn() {
             Sign In
           </Button>
           <Grid container>
-            {/* <Grid item xs>
-              <Link href="#" variant="body2">
-                Forgot password?
-              </Link>
-            </Grid> */}
             <Grid item>
               <Link to='/registration' variant="body2">
                 Don't have an account? Sign Up
@@ -163,9 +157,6 @@ export default function SignIn() {
           </Grid>
         </ValidatorForm>
       </div>
-      {/* <Box mt={8}>
-        <Copyright />
-      </Box> */}
     </Container>
   );
 }

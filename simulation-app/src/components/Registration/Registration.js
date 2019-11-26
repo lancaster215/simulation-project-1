@@ -2,33 +2,20 @@ import React, {useState} from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
-// import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-// import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
-// import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
-// import Login from '../Login/Login';
-// import { Link, Switch, Route } from 'react-router-dom';
+import Login from '../Login/Login';
+import { Link, Switch, Route } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import axios from 'axios';
-
-// function Copyright() {
-//   return (
-//     <Typography variant="body2" color="textSecondary" align="center">
-//       {'Copyright © '}
-//       <Link color="inherit" href="https://material-ui.com/">
-//         Your Website
-//       </Link>{' '}
-//       {new Date().getFullYear()}
-//       {'.'}
-//     </Typography>
-//   );
-// }
+import InputAdornment from '@material-ui/core/InputAdornment';
+import IconButton from '@material-ui/core/IconButton';
+import Visibility from '@material-ui/icons/Visibility';
+import VisibilityOff from '@material-ui/icons/VisibilityOff';
 
 const useStyles = makeStyles(theme => ({
   '@global': {
@@ -47,7 +34,7 @@ const useStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.secondary.main,
   },
   form: {
-    width: '100%', // Fix IE 11 issue.
+    width: '100%',
     marginTop: theme.spacing(3),
   },
   submit: {
@@ -57,40 +44,52 @@ const useStyles = makeStyles(theme => ({
 
 export default function SignUp() {
     const classes = useStyles();
-    var [fname, setfname] = useState('');
-    var [lname, setlname] = useState('');
-    var [email, setemail] = useState('');
-    var [uname, setuname] = useState('');
-    var [cpass, setcpass] = useState('');
-    var [pass, setpass] = useState('');
-    // const [submit, submitbtn] = useState({});
+    const [values, setValues] = useState({
+      fname: '',
+      lname: '',
+      email: '',
+      uname: '',
+      cpass: '',
+      pass: '',
+      active: false,
+      success: false,
+      showPassword: false,
+      error: false,
+    });
 
     const signthis = () =>{
-      if(cpass === pass){
+      if(values.cpass === values.pass){
         axios
         .post('http://localhost:3000/register', {
-          "firstName": fname,
-          "lastName": lname,
-          "email": email,
-          "username": uname,
-          // "password": md5(pass),
-          "password": pass,
-          "plainpassword": pass,
+          "firstName": values.fname,
+          "lastName": values.lname,
+          "email": values.email,
+          "username": values.uname,
+          "password": values.pass,
+          "plainpassword": values.pass,
           "active": true,
         }).then(res => {
-          localStorage.setItem('token', res.data.accessToken)
           alert('Success!');
-          setfname('')
-          setlname('')
-          setemail('')
-          setuname('')
-          setcpass('')
-          setpass('')
-        })
+          setValues({...values, success: true});
+        }).catch(err => setValues({...values, error: true}))
       }else{
         alert('Password did not match')
       }
     }
+    if(values.success){
+      return (<Redirect to='/login'/>)
+    }
+    const eventhandler = (e) =>{
+      let prevdata = Object.assign({}, values)
+      prevdata[e.target.name] = e.target.value;
+      setValues(prevdata)
+    }
+    const handleClickShowPassword = () => {
+      setValues({ ...values, showPassword: !values.showPassword });
+    };
+    const handleMouseDownPassword = event => {
+      event.preventDefault();
+    };
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -103,7 +102,6 @@ export default function SignUp() {
         </Typography>
         <ValidatorForm
           className={classes.form}
-          // ref="form"
           onSubmit={signthis}
           onError={errors => console.log(errors)}
         >
@@ -111,7 +109,7 @@ export default function SignUp() {
             <Grid item xs={12} sm={6}>
               <TextValidator
                 autoComplete="fname"
-                name="firstName"
+                name="fname"
                 variant="outlined"
                 fullWidth
                 id="firstName"
@@ -119,8 +117,8 @@ export default function SignUp() {
                 autoFocus
                 validators={['required']}
                 errorMessages={['This field is required']}
-                onChange={(e)=>{setfname(e.target.value)}}
-                value={fname}
+                onChange={eventhandler}
+                value={values.fname}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -129,12 +127,12 @@ export default function SignUp() {
                 fullWidth
                 id="lastName"
                 label="Last Name"
-                name="lastName"
+                name="lname"
                 autoComplete="lname"
                 validators={['required']}
                 errorMessages={['This field is required']}
-                onChange={(e)=>{setlname(e.target.value)}}
-                value={lname}
+                onChange={eventhandler}
+                value={values.lname}
               />
             </Grid>
             <Grid item xs={12}>
@@ -147,42 +145,56 @@ export default function SignUp() {
                 autoComplete="email"
                 validators={['required', 'isEmail']}
                 errorMessages={['This field is required', 'email is not valid']}
-                onChange={(e)=>{setemail(e.target.value)}}
-                value={email}
+                onChange={eventhandler}
+                value={values.email}
               />
             </Grid>
+            {(values.error)? <p className="error">Email already exist!</p>:(null)}
             <Grid item xs={12}>
               <TextValidator
                 variant="outlined"
                 fullWidth
                 id="username"
                 label="Username"
-                name="username"
+                name="uname"
                 autoComplete="username"
                 validators={['required']}
                 errorMessages={['This field is required']}
-                onChange={(e)=>{setuname(e.target.value)}}
-                value={uname}
+                onChange={eventhandler}
+                value={values.uname}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextValidator
                 variant="outlined"
                 fullWidth
-                name="password"
+                name="pass"
                 label="Password"
-                type="password"
+                type={values.showPassword ? 'text' : 'password'}
                 id="password"
                 autoComplete="current-password"
                 validators={['required']}
                 errorMessages={['This field is required']}
-                onChange={(e)=>{setpass(e.target.value)}}
-                value={pass}
+                onChange={eventhandler}
+                value={values.pass}
+                InputProps={{
+                  endAdornment:(
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        onMouseDown={handleMouseDownPassword}
+                      >
+                        {values.showPassword ? <Visibility /> : <VisibilityOff />}
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextValidator
-                name="confirmpass"
+                name="cpass"
                 variant="outlined"
                 fullWidth
                 type="password"
@@ -190,16 +202,10 @@ export default function SignUp() {
                 label="Confirm Password"
                 validators={['required']}
                 errorMessages={['This field is required']}
-                onChange={(e)=>{setcpass(e.target.value)}}
-                value={cpass}
+                onChange={eventhandler}
+                value={values.cpass}
               />
             </Grid>
-            {/* <Grid item xs={12}>
-              <FormControlLabel
-                control={<Checkbox value="allowExtraEmails" color="primary" />}
-                label="I want to receive inspiration, marketing promotions and updates via email."
-              />
-            </Grid> */}
           </Grid>
           <Button
             type="submit"
@@ -211,7 +217,7 @@ export default function SignUp() {
             Sign Up
           </Button>
         </ValidatorForm>
-          {/* <Grid container justify="flex-end">
+          <Grid container justify="flex-end">
             <Grid item>
               <Link to="/login" variant="body2">
                 Already have an account? Sign in
@@ -220,11 +226,8 @@ export default function SignUp() {
                 <Route component={Login} path='/login'/>
               </Switch>
             </Grid>
-          </Grid> */}
+          </Grid>
       </div>
-      {/* <Box mt={5}>
-        <Copyright />
-      </Box> */}
     </Container>
   );
 }
