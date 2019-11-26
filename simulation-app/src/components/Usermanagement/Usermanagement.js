@@ -5,6 +5,43 @@ import axios from 'axios';
 import Button from '@material-ui/core/Button';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
+import ListIcon from '@material-ui/icons/List';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Dialog from '@material-ui/core/Dialog';
+import PropTypes from 'prop-types'
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import ListItemText from '@material-ui/core/ListItemText';
+import Avatar from '@material-ui/core/Avatar';
+import PersonIcon from '@material-ui/icons/Person';
+
+function SimpleDialog(props) {
+    const { onClose, selectedValue, open } = props;
+    const handleClose = () => {
+      onClose(selectedValue);
+    };
+return (
+      <Dialog onClose={handleClose} aria-labelledby="simple-dialog-title" open={open}>
+        <DialogTitle id="simple-dialog-title">User Details</DialogTitle>
+        <List>
+            <ListItem >
+              <ListItemAvatar>
+                <Avatar>
+                  <PersonIcon />
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText primary={selectedValue} />
+            </ListItem>
+        </List>
+      </Dialog>
+    );
+}
+SimpleDialog.propTypes = {
+    onClose: PropTypes.func.isRequired,
+    open: PropTypes.bool.isRequired,
+    selectedValue: PropTypes.string.isRequired,
+};
 
 export default function UserManage() {
     var [token, emptyToken] = useState(false)
@@ -31,7 +68,9 @@ export default function UserManage() {
         },
         ],
     });
-    const [name, setName] = useState({uname: ''});
+    const [name, setName] = useState({uname: '', fname: '', lname: '', email: ''});
+    const [open, setOpen] = useState(false);
+    const [selectedValue, setSelectedValue] = useState({uname: '', fname: '', lname: '', email: ''});
 
     useEffect(() => {
         axios
@@ -60,7 +99,10 @@ export default function UserManage() {
         .get(`http://localhost:3000/users?email=${localStorage.getItem('useremail')}`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}`}
         })
-        .then(res=>{setName(e =>{ return {...e, uname:res.data[0].username} })})
+        .then(res=>
+            {
+                setName(e =>{ return {...e, uname:res.data[0].firstName, fname:res.data[0].firstName, lname:res.data[0].lastName, email:res.data[0].email} })
+            })
     },[])
     var onUpdate = (e) =>{
         var tralse;
@@ -94,6 +136,7 @@ export default function UserManage() {
             console.log(res)
         })
     }
+
     const logout = () =>{
         localStorage.clear();
         emptyToken(true);
@@ -104,18 +147,28 @@ export default function UserManage() {
     if(!localStorage.getItem('token')){
         return(<Redirect to="/login"/>)
     }
+    const handleClickOpen = () => {
+        setOpen(true);
+      };
+    
+    const handleClose = value => {
+        setOpen(false);
+        setSelectedValue(value);
+    };
     return (
         <React.Fragment>
             <AppBar position="static" color="default" elevation={0}>
                 <Toolbar>
                     <Button title="Logout User" size="small" variant="outlined" color="primary" onClick={logout}>
                         Logout
-                    </Button>
+                    </Button>&nbsp;
+                    <ListIcon title="User Details" fontSize="large" onClick={handleClickOpen} style={{cursor: 'pointer'}}/>
+                    <SimpleDialog selectedValue={name.email} open={open} onClose={handleClose}/>
                 </Toolbar>
             </AppBar>
             <MaterialTable
                 style={{width: '95%', margin: '50px auto'}}
-                options={{filtering: true}}
+                options={{filtering: true, headerStyle: {backgroundColor: '#f5f5f5'}}}
                 title={`Welcome ${name.uname}!`}
                 columns={state.columns}
                 data={state.data}

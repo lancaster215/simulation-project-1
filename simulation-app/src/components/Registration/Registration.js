@@ -1,9 +1,9 @@
 import React, {useState} from 'react';
-import Avatar from '@material-ui/core/Avatar';
+// import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Grid from '@material-ui/core/Grid';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+import PersonPinIcon from '@material-ui/icons/PersonPin';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
@@ -94,9 +94,9 @@ export default function SignUp() {
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
-        </Avatar>
+        {/* <Avatar className={classes.avatar}> */}
+          <PersonPinIcon fontSize="large"/>
+        {/* </Avatar> */}
         <Typography component="h1" variant="h5">
           Sign up
         </Typography>
@@ -115,8 +115,8 @@ export default function SignUp() {
                 id="firstName"
                 label="First Name"
                 autoFocus
-                validators={['required']}
-                errorMessages={['This field is required']}
+                validators={['required', 'matchRegexp:^[A-Za-z]+$']}
+                errorMessages={['This field is required', 'Must contain letters only.']}
                 onChange={eventhandler}
                 value={values.fname}
               />
@@ -129,8 +129,8 @@ export default function SignUp() {
                 label="Last Name"
                 name="lname"
                 autoComplete="lname"
-                validators={['required']}
-                errorMessages={['This field is required']}
+                validators={['required', 'matchRegexp:^[A-Za-z]+$']}
+                errorMessages={['This field is required', 'Must contain letters only.']}
                 onChange={eventhandler}
                 value={values.lname}
               />
